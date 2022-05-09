@@ -46,6 +46,15 @@ class Poke {
   isItHousepet() {
     // check height, weight, and types
     let badTypes = ["fire", "electric", "fighting", "poison", "ghost"]
+    let weightPokemon = this.weightToPounds(this.weight);
+    let heightPokemon = this.heightToFeet(this.height);
+    if(weightPokemon > 400) {
+      this.reason.push(`it is too heavey at ${masaPokemona} pounds`)
+      this.housepet = false;
+    }
     
+    if(heightPokemon > 7) {
+      this.reason.push(`it is too tall at ${heightPokemon} feet`)
+    }
   }
 }
