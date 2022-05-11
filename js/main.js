@@ -4,7 +4,7 @@ document.querySelector('button').addEventListener('click', getFetch)
 function getFetch(){
   const choice = document.querySelector('input').value.replaceAll('.', '').replaceAll(' ', '-').toLowerCase();
   const url = `https://pokeapi.co/api/v2/pokemon/${choice}`
-  console.log(url)
+  
 
   fetch(url)
       .then(res => res.json()) // parse response as JSON
@@ -13,14 +13,16 @@ function getFetch(){
         const potentialPet = new PokeInfo(data.name, data.weight, data.height,data.types, data.sprites.other['official-artwork'].front_default, data.location_area_encounters);
         potentialPet.getTypes()
         potentialPet.isItHousepet()
-        potentialPet.locationInfo()
-        potentialPet.locationCleanUp()
+        
         let decision = ''
         if(potentialPet.housepet) {
-          decision = 'This Pokemon is small enough, light enough, and safe enough to be a good pet!'; 
+          decision = `This Pokemon is small enough, light enough, and safe enough to be a good pet! You can find ${potentialPet.name} in the following location(s):`
+          potentialPet.locationInfo();
+          document.getElementById('locations').innerText = '';
         }
         else {
           decision = `This Pokemon would not be a good pet because ${potentialPet.reason.join(' and ')}.`
+          document.getElementById('locations').innerText = '';
         }
         document.querySelector('h2').innerText = decision;
         document.querySelector('img').src = potentialPet.image;
@@ -63,7 +65,7 @@ class Poke {
     let badTypes = ["fire", "electric", "fighting", "poison", "ghost"]
     let weightPokemon = this.weightToPounds(this.weight);
     let heightPokemon = this.heightToFeet(this.height);
-    console.log(this.reason)
+    
 
     if(weightPokemon > 400) {
       this.reason.push(`it is too heavey at ${weightPokemon} pounds`)
@@ -97,16 +99,9 @@ class PokeInfo extends Poke {
     fetch(this.locationURL) 
         .then(res => res.json())
         .then(data => {
-          data.forEach(obj => {
-            this.locationList.push(obj.location_area.name
-              )
-              
-          })
-          this.locationList.forEach(location => {
-            this.locationString += location;
-          })
-          console.log(this.locationString)
-          console.log(this.locationCleanUp())
+          data.forEach(obj => this.locationList.push(obj.location_area.name))
+          let target = document.getElementById('locations')
+          target.innerText = this.locationCleanUp()      
         })
         .catch(err => {
           console.log(`error ${err}`)
@@ -114,8 +109,13 @@ class PokeInfo extends Poke {
   }
 
   locationCleanUp() {
-    const words = this.locationList.slice(0,5).join(',').replaceAll("-", ' ').split(' ')
-    return words
+    const words = this.locationList.slice(0,5).join(', ').replaceAll('-', ' ').split(' ')
 
+    for(let i =0; i < words.length; i++) {
+      words[i] = words[i][0].toUpperCase() + words[i].slice(1);
+    }
+    
+    return words.join(' ')
+    
   }
 }
